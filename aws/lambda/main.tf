@@ -1,8 +1,12 @@
 module "global_config" {
-  source = "../../modules/global_config" # Relative path to your global module
+  source = "../modules/global_config" # Relative path to your global module
 
   # You can pass values here if you want to override the default in the global module
   # aws_region = "ap-south-1"
+}
+
+provider "aws" {
+  region = module.global_config.aws_region
 }
 
 resource "aws_lambda_function" "movies_api_lambda" {
@@ -22,8 +26,8 @@ resource "aws_lambda_function" "movies_api_lambda" {
   }
 
   tags = {
-    Name        = "Movies REST API"
-    Environment = "Dev"
+    Name        = module.global_config.project_name
+    Environment = module.global_config.environment
   }
 }
 

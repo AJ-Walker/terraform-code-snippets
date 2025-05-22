@@ -1,12 +1,8 @@
 module "global_config" {
-  source = "../../modules/global_config" # Relative path to your global module
+  source = "../modules/global_config" # Relative path to your global module
 
   # You can pass values here if you want to override the default in the global module
   # aws_region = "ap-south-1"
-}
-
-provider "aws" {
-  region = module.global_config.aws_region
 }
 
 locals {
@@ -17,8 +13,8 @@ resource "aws_s3_bucket" "movies_rest_api_bucket" {
   bucket = var.bucket_name
 
   tags = {
-    Name        = "Movies REST API"
-    Environment = "Dev"
+    Name        = module.global_config.project_name
+    Environment = module.global_config.environment
   }
 }
 
@@ -44,4 +40,6 @@ resource "aws_s3_bucket_public_access_block" "movies_rest_api_bucket_public_acce
 resource "aws_s3_bucket_policy" "allow_get_images_policy" {
   bucket = aws_s3_bucket.movies_rest_api_bucket.id
   policy = data.aws_iam_policy_document.allow_get_s3_images_policy.json
+
+  depends_on = [aws_s3_bucket_public_access_block.movies_rest_api_bucket_public_access]
 }
